@@ -1,0 +1,154 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(StoreApp());
+}
+
+class StoreApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, dynamic>> productData = [
+    {"name": "Shoes", "price": 2000, "color": Colors.blue},
+    {"name": "T-Shirt", "price": 800, "color": Colors.green},
+    {"name": "Watch", "price": 1500, "color": Colors.orange},
+  ];
+
+  final List<Map<String, dynamic>> cartList = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("My Products"),
+      ),
+      body: GridView.builder(
+        padding: EdgeInsets.all(10),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: productData.length,
+        itemBuilder: (context, index) {
+          final item = productData[index];
+
+          return Container(
+            decoration: BoxDecoration(
+              color: item["color"],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  item["name"],
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  "₹ ${item["price"]}",
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(height: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white),
+                  onPressed: () {
+                    setState(() {
+                      cartList.add(item);
+                    });
+                  },
+                  child: Text(
+                    "Add",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                )
+              ],
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.shopping_cart),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CartScreen(cart: cartList),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class CartScreen extends StatefulWidget {
+  final List<Map<String, dynamic>> cart;
+
+  CartScreen({required this.cart});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  @override
+  Widget build(BuildContext context) {
+    int total = 0;
+    for (var item in widget.cart) {
+      total += item["price"] as int;
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Cart Items")),
+      body: widget.cart.isEmpty
+          ? Center(child: Text("No items added"))
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: widget.cart.length,
+                    itemBuilder: (context, index) {
+                      final item = widget.cart[index];
+                      return ListTile(
+                        title: Text(item["name"]),
+                        subtitle: Text("₹ ${item["price"]}"),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              widget.cart.removeAt(index);
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Text(
+                    "Total: ₹ $total",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            ),
+    );
+  }
+}
